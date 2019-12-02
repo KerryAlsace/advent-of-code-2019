@@ -10,8 +10,69 @@ var testInput3 = []int{2, 3, 0, 3, 99}                          // 2,3,0,6,99
 var testInput4 = []int{2, 4, 4, 5, 99, 0}                       // 2,4,4,5,99,9801
 var testInput5 = []int{1, 1, 1, 4, 99, 5, 6, 0, 99}             // 30,1,1,4,2,5,6,0,99
 
+var partTwoOutPut = 19690720
+
 func main() {
-	input := officialInput
+	partOne(officialInput)
+	partTwo(officialInput)
+}
+
+// Functions for Part 2
+func partTwo(input []int) {
+
+}
+
+// returns the set and the index of the last value in the set where input[0] is edited
+func findLastChangeSet(input []int) ([]int, int) {
+	lastIndexOfLastChangeSet := 3
+	cont, set, lastIndex := getNextSet(-1, input)
+
+	for cont {
+		makeCalcs(set, input)
+		cont, set, lastIndex = getNextSet(lastIndex, input)
+		if input[lastIndex] == 0 {
+			lastIndexOfLastChangeSet = lastIndex
+		}
+	}
+
+	input[lastIndexOfLastChangeSet] = partTwoOutPut
+
+	contRev, revSet, revLastIndex := getPrevSet(lastIndex, input)
+	for cont {
+		flipItAndReverseIt(revSet, input)
+		contRev, revSet, revLastIndex = getPrevSet(revLastIndex, input)
+	}
+
+	fmt.Println(formatAnswer(input[1], input[2]))
+}
+
+func flipItAndReverseIt(set []int, input []int) {
+
+}
+
+// returns false if you've reached the first set, or returns true, the previous set, and the index of the last int in the previous set
+func getPrevSet(lastIndex int, input []int) (bool, []int, int) {
+	// current set = lastIndex-3 to lastIndex
+	// first index of previous set is (lastIndex-3) - 4
+	firstIndex := lastIndex - 7
+
+	set := []int{input[firstIndex], input[firstIndex+1], input[firstIndex+2], input[firstIndex+3]}
+	newLastIndex := firstIndex + 3
+
+	if firstIndex == 4 {
+		return false, set, newLastIndex
+	}
+
+	return true, set, newLastIndex
+}
+
+// formats the answer as directed
+func formatAnswer(noun int, verb int) int {
+	return (noun * 100) + verb
+}
+
+// Functions for Part 1
+func partOne(input []int) {
 	cont, set, lastIndex := getNextSet(-1, input)
 
 	for cont {
@@ -43,12 +104,12 @@ func makeCalcs(set []int, input []int) []int {
 	return input
 }
 
-// returns true if program should halt, otherwise returns false, the next 4 ints, and the index of the last int
+// returns false if program should halt, otherwise returns true, the next 4 ints, and the index of the last int
 func getNextSet(lastIndex int, input []int) (bool, []int, int) {
 	firstIndex := lastIndex + 1
 
 	if input[firstIndex] == 99 {
-		return false, nil, lastIndex
+		return false, []int{input[lastIndex-3], input[lastIndex-2], input[lastIndex-1]}, lastIndex
 	}
 
 	return true, []int{input[firstIndex], input[firstIndex+1], input[firstIndex+2], input[firstIndex+3]}, firstIndex + 3
