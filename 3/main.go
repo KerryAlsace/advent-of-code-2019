@@ -15,7 +15,7 @@ var part2TestInput1Answer = 610
 var part2TestInput2Answer = 410
 
 func main() {
-	fileName := "testInput1"
+	fileName := "input"
 	partOne(fileName)
 
 	part2(fileName)
