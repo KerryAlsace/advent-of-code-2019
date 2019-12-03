@@ -15,12 +15,10 @@ var part2TestInput1Answer = 610
 var part2TestInput2Answer = 410
 
 func main() {
-	// Part 1
 	fileName := "testInput2"
 	partOne(fileName)
 
-	// Part 2
-
+	part2(fileName)
 }
 
 // copied from https://github.com/brianstarke/aoc-2019/blob/master/day2-2/main.go#L31
@@ -32,6 +30,12 @@ func formatInput(n string) []string {
 	}
 
 	return strings.Split(string(b), ",")
+}
+
+// Part 2 Functions
+func part2(fileName string) {
+	// inputA := formatInput(fmt.Sprintf("%sA", fileName))
+	// inputB := formatInput(fmt.Sprintf("%sB", fileName))
 }
 
 // Part 1 Functions
