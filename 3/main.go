@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -34,6 +35,9 @@ func partOne(inputA []string, inputB []string) {
 	wirePathA := getPaths(inputA)
 	wirePathB := getPaths(inputB)
 
+	// fmt.Printf("WirePathA: %v\n", wirePathA)
+	// fmt.Printf("WirePathB: %v\n", wirePathB)
+
 	// figure out where they first cross
 	i := findFirstIntersection(wirePathA, wirePathB)
 
@@ -54,6 +58,8 @@ func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
 		}
 	}
 
+	fmt.Printf("Intersecting Ports: %v\n", intersectingPorts)
+
 	var shortestDistance int
 	var portOfShortestDistance Port
 	for i, port := range intersectingPorts {
@@ -73,7 +79,10 @@ func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
 }
 
 func calculateManhattanDistance(i Port) int {
-	return i.Column + i.Row
+	c := math.Abs(float64(i.Column))
+	r := math.Abs(float64(i.Row))
+
+	return int(c) + int(r)
 }
 
 // WirePath is the path of a wire
@@ -112,6 +121,7 @@ func getPaths(input []string) WirePath {
 }
 
 func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
+	fmt.Printf("Instructions: %v\n", instructions)
 	var ports []Port
 	var nextPort Port
 
@@ -122,14 +132,16 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 		panic(err)
 	}
 
+	fmt.Printf("distance: %v\n", distance)
+
 	// add all ports inbetween current and next port
 	switch direction {
 	case "R":
 		currentColumn := currentPort.Column
-		for i := 0; i < distance+1; i++ {
+		for i := 1; i < distance+2; i++ {
 			n := Port{
 				Row:    currentPort.Row,
-				Column: currentColumn + 1,
+				Column: currentColumn + i,
 			}
 			ports = append(ports, n)
 		}
@@ -138,10 +150,10 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 		nextPort.Column = currentPort.Column + distance
 	case "L":
 		currentColumn := currentPort.Column
-		for i := 0; i < distance+1; i++ {
+		for i := 1; i < distance+2; i++ {
 			n := Port{
 				Row:    currentPort.Row,
-				Column: currentColumn - 1,
+				Column: currentColumn - i,
 			}
 			ports = append(ports, n)
 		}
@@ -150,9 +162,9 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 		nextPort.Column = currentPort.Column - distance
 	case "U":
 		currentRow := currentPort.Row
-		for i := 0; i < distance+1; i++ {
+		for i := 1; i < distance+2; i++ {
 			n := Port{
-				Row:    currentRow - 1,
+				Row:    currentRow - i,
 				Column: currentPort.Column,
 			}
 			ports = append(ports, n)
@@ -162,9 +174,9 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 		nextPort.Column = currentPort.Column
 	case "D":
 		currentRow := currentPort.Row
-		for i := 0; i < distance+1; i++ {
+		for i := 1; i < distance+2; i++ {
 			n := Port{
-				Row:    currentRow + 1,
+				Row:    currentRow + i,
 				Column: currentPort.Column,
 			}
 			ports = append(ports, n)
@@ -175,6 +187,9 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 	default:
 		panic("unknown direction")
 	}
+
+	fmt.Printf("Ports: %v\n", ports)
+	fmt.Printf("NextPort: %v\n", nextPort)
 
 	return ports, nextPort
 }
