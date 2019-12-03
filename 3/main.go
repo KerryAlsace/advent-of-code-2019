@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -17,7 +18,8 @@ func main() {
 }
 
 // copied from https://github.com/brianstarke/aoc-2019/blob/master/day2-2/main.go#L31
-func formatInput(fileName string) []string {
+func formatInput(n string) []string {
+	fileName := fmt.Sprintf("%s.txt", n)
 	b, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		panic(err)
@@ -32,6 +34,46 @@ func partOne(inputA []string, inputB []string) {
 	wirePathA := getPaths(inputA)
 	wirePathB := getPaths(inputB)
 
+	// figure out where they first cross
+	i := findFirstIntersection(wirePathA, wirePathB)
+
+	// calculate manhattan distance
+	d := calculateManhattanDistance(i)
+
+	fmt.Printf("Part 1 Answer: %v\n", d)
+}
+
+// this could be optimized
+func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
+	var intersectingPorts []Port
+	for _, portA := range pathA.Ports {
+		for _, portB := range pathB.Ports {
+			if portA == portB {
+				intersectingPorts = append(intersectingPorts, portA)
+			}
+		}
+	}
+
+	var shortestDistance int
+	var portOfShortestDistance Port
+	for i, port := range intersectingPorts {
+		d := calculateManhattanDistance(port)
+		if i == 0 {
+			portOfShortestDistance = port
+			shortestDistance = d
+		}
+
+		if d < shortestDistance {
+			portOfShortestDistance = port
+			shortestDistance = d
+		}
+	}
+
+	return portOfShortestDistance
+}
+
+func calculateManhattanDistance(i Port) int {
+	return i.Column + i.Row
 }
 
 // WirePath is the path of a wire
