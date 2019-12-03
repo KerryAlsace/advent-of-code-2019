@@ -35,9 +35,6 @@ func partOne(inputA []string, inputB []string) {
 	wirePathA := getPaths(inputA)
 	wirePathB := getPaths(inputB)
 
-	// fmt.Printf("WirePathA: %v\n", wirePathA)
-	// fmt.Printf("WirePathB: %v\n", wirePathB)
-
 	// figure out where they first cross
 	i := findFirstIntersection(wirePathA, wirePathB)
 
@@ -58,13 +55,14 @@ func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
 		}
 	}
 
-	fmt.Printf("Intersecting Ports: %v\n", intersectingPorts)
-
 	var shortestDistance int
 	var portOfShortestDistance Port
-	for i, port := range intersectingPorts {
+	for _, port := range intersectingPorts {
 		d := calculateManhattanDistance(port)
-		if i == 0 {
+		if port.Row == 0 && port.Column == 0 {
+			continue
+		}
+		if shortestDistance == 0 {
 			portOfShortestDistance = port
 			shortestDistance = d
 		}
@@ -121,7 +119,6 @@ func getPaths(input []string) WirePath {
 }
 
 func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
-	fmt.Printf("Instructions: %v\n", instructions)
 	var ports []Port
 	var nextPort Port
 
@@ -131,8 +128,6 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("distance: %v\n", distance)
 
 	// add all ports inbetween current and next port
 	switch direction {
@@ -187,9 +182,6 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 	default:
 		panic("unknown direction")
 	}
-
-	fmt.Printf("Ports: %v\n", ports)
-	fmt.Printf("NextPort: %v\n", nextPort)
 
 	return ports, nextPort
 }
