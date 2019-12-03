@@ -82,7 +82,7 @@ func getDistance(inputA []string, inputB []string) int {
 	i := findFirstIntersection(intersections)
 
 	// return calculated manhattan distance
-	return calculateManhattanDistance(i)
+	return calculateManhattanDistance(i.Row, i.Column)
 }
 
 func getPaths(input []string) WirePath {
@@ -124,7 +124,7 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 	switch direction {
 	case "R":
 		currentColumn := currentPort.Column
-		for i := 1; i < distance+2; i++ {
+		for i := 1; i < distance+1; i++ {
 			n := Port{
 				Row:    currentPort.Row,
 				Column: currentColumn + i,
@@ -136,7 +136,7 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 		nextPort.Column = currentPort.Column + distance
 	case "L":
 		currentColumn := currentPort.Column
-		for i := 1; i < distance+2; i++ {
+		for i := 1; i < distance+1; i++ {
 			n := Port{
 				Row:    currentPort.Row,
 				Column: currentColumn - i,
@@ -148,7 +148,7 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 		nextPort.Column = currentPort.Column - distance
 	case "U":
 		currentRow := currentPort.Row
-		for i := 1; i < distance+2; i++ {
+		for i := 1; i < distance+1; i++ {
 			n := Port{
 				Row:    currentRow - i,
 				Column: currentPort.Column,
@@ -160,7 +160,7 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 		nextPort.Column = currentPort.Column
 	case "D":
 		currentRow := currentPort.Row
-		for i := 1; i < distance+2; i++ {
+		for i := 1; i < distance+1; i++ {
 			n := Port{
 				Row:    currentRow + i,
 				Column: currentPort.Column,
@@ -195,7 +195,7 @@ func findFirstIntersection(intersectingPorts []Port) Port {
 	var shortestDistance int
 	var portOfShortestDistance Port
 	for _, port := range intersectingPorts {
-		d := calculateManhattanDistance(port)
+		d := calculateManhattanDistance(port.Row, port.Column)
 		if port.Row == 0 && port.Column == 0 {
 			continue
 		}
@@ -213,9 +213,9 @@ func findFirstIntersection(intersectingPorts []Port) Port {
 	return portOfShortestDistance
 }
 
-func calculateManhattanDistance(i Port) int {
-	c := math.Abs(float64(i.Column))
-	r := math.Abs(float64(i.Row))
+func calculateManhattanDistance(row int, column int) int {
+	c := math.Abs(float64(column))
+	r := math.Abs(float64(row))
 
 	return int(c) + int(r)
 }
@@ -225,7 +225,7 @@ func part2(fileName string) {
 	inputA := formatInput(fmt.Sprintf("%sA", fileName))
 	inputB := formatInput(fmt.Sprintf("%sB", fileName))
 
-	d := getAnswer(inputA, inputB)
+	d := findShortestDistance(inputA, inputB)
 	fmt.Printf("Part 2 Answer: %v\n", d)
 
 	if fileName == "testInput1" {
@@ -247,7 +247,7 @@ func part2(fileName string) {
 	}
 }
 
-func getAnswer(inputA []string, inputB []string) int {
+func findShortestDistance(inputA []string, inputB []string) int {
 	// get wire paths
 	wirePathA := getPaths(inputA)
 	wirePathB := getPaths(inputB)
@@ -255,11 +255,6 @@ func getAnswer(inputA []string, inputB []string) int {
 	// get all interesections
 	intersections := findAllIntersections(wirePathA, wirePathB)
 
-	// return shortest distance
-	return findShortestDistance(intersections, wirePathA, wirePathB)
-}
-
-func findShortestDistance(intersections []Port, wirePathA WirePath, wirePathB WirePath) int {
 	var portDistances []PortDistance
 	var shortestDistance int
 
@@ -268,38 +263,74 @@ func findShortestDistance(intersections []Port, wirePathA WirePath, wirePathB Wi
 			continue
 		}
 
+		a := findDistanceToTargetPort(port, inputA, "a")
+		b := findDistanceToTargetPort(port, inputB, "b")
+
 		pd := PortDistance{
-			Port:      port,
-			DistanceA: findDistanceToPort(wirePathA),
-			DistanceB: findDistanceToPort(wirePathB),
+			Port:          port,
+			DistanceA:     a,
+			DistanceB:     b,
+			TotalDistance: a + b,
 		}
 
 		portDistances = append(portDistances, pd)
 	}
 
 	for _, distance := range portDistances {
-		d := distance.DistanceA + distance.DistanceB
-
 		if shortestDistance == 0 {
-			shortestDistance = d
+			shortestDistance = distance.TotalDistance
 			continue
 		}
 
-		if d < shortestDistance {
-			shortestDistance = d
+		if distance.TotalDistance < shortestDistance {
+			shortestDistance = distance.TotalDistance
 		}
 	}
 
 	return shortestDistance
 }
 
-func findDistanceToPort(wirePath WirePath) int {
-	return 0
+func findDistanceToNextPort(targetPort Port, path []Port) (bool, int) {
+	var totalDistance int
+	var encounteredTarget bool
+
+	for _, p := range path {
+		totalDistance++
+
+		if p.Row == targetPort.Row && p.Column == targetPort.Column {
+			encounteredTarget = true
+			break
+		}
+	}
+
+	return encounteredTarget, totalDistance
+}
+
+func findDistanceToTargetPort(targetPort Port, input []string, whichInput string) int {
+	var totalDistance int
+	var currentPort Port
+
+	for _, instruction := range input {
+		nextPorts, nextPort := findNextPorts(currentPort, instruction)
+
+		encounteredTarget, dist := findDistanceToNextPort(targetPort, nextPorts)
+
+		totalDistance += dist
+
+		if encounteredTarget {
+			break
+		}
+
+		currentPort = nextPort
+	}
+
+	return totalDistance
 }
 
 // PortDistance holds the total distance to Port
 type PortDistance struct {
-	Port      Port
-	DistanceA int
-	DistanceB int
+	Port          Port
+	DistanceA     int
+	DistanceB     int
+	TotalDistance int
 }
