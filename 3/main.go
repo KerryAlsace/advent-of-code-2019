@@ -15,7 +15,7 @@ var part2TestInput1Answer = 610
 var part2TestInput2Answer = 410
 
 func main() {
-	fileName := "testInput2"
+	fileName := "testInput1"
 	partOne(fileName)
 
 	part2(fileName)
@@ -42,18 +42,20 @@ func partOne(fileName string) {
 
 	if fileName == "testInput1" {
 		if part1TestInput1Answer != d {
-			fmt.Printf("Part 1 is incorrect, got: %v, want: %v\n", d, part1TestInput1Answer)
+			fmt.Printf("Part 1 is incorrect; got: %v, want: %v\n", d, part1TestInput1Answer)
+			return
 		}
 
-		fmt.Printf("Part 1 is correct\n")
+		fmt.Println("Part 1 is correct")
 	}
 
 	if fileName == "testInput2" {
 		if part1TestInput2Answer != d {
-			fmt.Printf("Part 1 is incorrect, got: %v, want: %v\n", d, part1TestInput2Answer)
+			fmt.Printf("Part 1 is incorrect; got: %v, want: %v\n", d, part1TestInput2Answer)
+			return
 		}
 
-		fmt.Printf("Part 1 is correct\n")
+		fmt.Println("Part 1 is correct")
 	}
 }
 
@@ -73,8 +75,11 @@ func getDistance(inputA []string, inputB []string) int {
 	wirePathA := getPaths(inputA)
 	wirePathB := getPaths(inputB)
 
+	// figure out all intersections
+	intersections := findAllIntersections(wirePathA, wirePathB)
+
 	// figure out where they first cross
-	i := findFirstIntersection(wirePathA, wirePathB)
+	i := findFirstIntersection(intersections)
 
 	// return calculated manhattan distance
 	return calculateManhattanDistance(i)
@@ -173,7 +178,7 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 }
 
 // this could be optimized
-func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
+func findAllIntersections(pathA WirePath, pathB WirePath) []Port {
 	var intersectingPorts []Port
 	for _, portA := range pathA.Ports {
 		for _, portB := range pathB.Ports {
@@ -183,6 +188,10 @@ func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
 		}
 	}
 
+	return intersectingPorts
+}
+
+func findFirstIntersection(intersectingPorts []Port) Port {
 	var shortestDistance int
 	var portOfShortestDistance Port
 	for _, port := range intersectingPorts {
@@ -213,7 +222,84 @@ func calculateManhattanDistance(i Port) int {
 
 // Part 2 Functions
 func part2(fileName string) {
-	// inputA := formatInput(fmt.Sprintf("%sA", fileName))
-	// inputB := formatInput(fmt.Sprintf("%sB", fileName))
+	inputA := formatInput(fmt.Sprintf("%sA", fileName))
+	inputB := formatInput(fmt.Sprintf("%sB", fileName))
 
+	d := getAnswer(inputA, inputB)
+	fmt.Printf("Part 2 Answer: %v\n", d)
+
+	if fileName == "testInput1" {
+		if part2TestInput1Answer != d {
+			fmt.Printf("Part 2 is incorrect; got: %v, want: %v\n", d, part2TestInput1Answer)
+			return
+		}
+
+		fmt.Println("Part 2 is correct")
+	}
+
+	if fileName == "testInput2" {
+		if part2TestInput2Answer != d {
+			fmt.Printf("Part 2 is incorrect; got: %v, want: %v\n", d, part2TestInput2Answer)
+			return
+		}
+
+		fmt.Println("Part 2 is correct")
+	}
+}
+
+func getAnswer(inputA []string, inputB []string) int {
+	// get wire paths
+	wirePathA := getPaths(inputA)
+	wirePathB := getPaths(inputB)
+
+	// get all interesections
+	intersections := findAllIntersections(wirePathA, wirePathB)
+
+	// return shortest distance
+	return findShortestDistance(intersections, wirePathA, wirePathB)
+}
+
+func findShortestDistance(intersections []Port, wirePathA WirePath, wirePathB WirePath) int {
+	var portDistances []PortDistance
+	var shortestDistance int
+
+	for _, port := range intersections {
+		if port.Row == 0 && port.Column == 0 {
+			continue
+		}
+
+		pd := PortDistance{
+			Port:      port,
+			DistanceA: findDistanceToPort(wirePathA),
+			DistanceB: findDistanceToPort(wirePathB),
+		}
+
+		portDistances = append(portDistances, pd)
+	}
+
+	for _, distance := range portDistances {
+		d := distance.DistanceA + distance.DistanceB
+
+		if shortestDistance == 0 {
+			shortestDistance = d
+			continue
+		}
+
+		if d < shortestDistance {
+			shortestDistance = d
+		}
+	}
+
+	return shortestDistance
+}
+
+func findDistanceToPort(wirePath WirePath) int {
+	return 0
+}
+
+// PortDistance holds the total distance to Port
+type PortDistance struct {
+	Port      Port
+	DistanceA int
+	DistanceB int
 }
