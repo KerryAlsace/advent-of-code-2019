@@ -32,12 +32,6 @@ func formatInput(n string) []string {
 	return strings.Split(string(b), ",")
 }
 
-// Part 2 Functions
-func part2(fileName string) {
-	// inputA := formatInput(fmt.Sprintf("%sA", fileName))
-	// inputB := formatInput(fmt.Sprintf("%sB", fileName))
-}
-
 // Part 1 Functions
 func partOne(fileName string) {
 	inputA := formatInput(fmt.Sprintf("%sA", fileName))
@@ -63,6 +57,17 @@ func partOne(fileName string) {
 	}
 }
 
+// WirePath is the path of a wire
+type WirePath struct {
+	Ports []Port
+}
+
+// Port is a Port
+type Port struct {
+	Column int
+	Row    int
+}
+
 func getDistance(inputA []string, inputB []string) int {
 	// get wire paths
 	wirePathA := getPaths(inputA)
@@ -73,56 +78,6 @@ func getDistance(inputA []string, inputB []string) int {
 
 	// return calculated manhattan distance
 	return calculateManhattanDistance(i)
-}
-
-// this could be optimized
-func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
-	var intersectingPorts []Port
-	for _, portA := range pathA.Ports {
-		for _, portB := range pathB.Ports {
-			if portA == portB {
-				intersectingPorts = append(intersectingPorts, portA)
-			}
-		}
-	}
-
-	var shortestDistance int
-	var portOfShortestDistance Port
-	for _, port := range intersectingPorts {
-		d := calculateManhattanDistance(port)
-		if port.Row == 0 && port.Column == 0 {
-			continue
-		}
-		if shortestDistance == 0 {
-			portOfShortestDistance = port
-			shortestDistance = d
-		}
-
-		if d < shortestDistance {
-			portOfShortestDistance = port
-			shortestDistance = d
-		}
-	}
-
-	return portOfShortestDistance
-}
-
-func calculateManhattanDistance(i Port) int {
-	c := math.Abs(float64(i.Column))
-	r := math.Abs(float64(i.Row))
-
-	return int(c) + int(r)
-}
-
-// WirePath is the path of a wire
-type WirePath struct {
-	Ports []Port
-}
-
-// Port is a Port
-type Port struct {
-	Column int
-	Row    int
 }
 
 func getPaths(input []string) WirePath {
@@ -215,4 +170,50 @@ func findNextPorts(currentPort Port, instructions string) ([]Port, Port) {
 	}
 
 	return ports, nextPort
+}
+
+// this could be optimized
+func findFirstIntersection(pathA WirePath, pathB WirePath) Port {
+	var intersectingPorts []Port
+	for _, portA := range pathA.Ports {
+		for _, portB := range pathB.Ports {
+			if portA == portB {
+				intersectingPorts = append(intersectingPorts, portA)
+			}
+		}
+	}
+
+	var shortestDistance int
+	var portOfShortestDistance Port
+	for _, port := range intersectingPorts {
+		d := calculateManhattanDistance(port)
+		if port.Row == 0 && port.Column == 0 {
+			continue
+		}
+		if shortestDistance == 0 {
+			portOfShortestDistance = port
+			shortestDistance = d
+		}
+
+		if d < shortestDistance {
+			portOfShortestDistance = port
+			shortestDistance = d
+		}
+	}
+
+	return portOfShortestDistance
+}
+
+func calculateManhattanDistance(i Port) int {
+	c := math.Abs(float64(i.Column))
+	r := math.Abs(float64(i.Row))
+
+	return int(c) + int(r)
+}
+
+// Part 2 Functions
+func part2(fileName string) {
+	// inputA := formatInput(fmt.Sprintf("%sA", fileName))
+	// inputB := formatInput(fmt.Sprintf("%sB", fileName))
+
 }
