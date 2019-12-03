@@ -8,14 +8,19 @@ import (
 	"strings"
 )
 
-var testInput1Answer = 159
+var part1TestInput1Answer = 159
+var part1TestInput2Answer = 135
 
-var testInput2Answer = 135
+var part2TestInput1Answer = 610
+var part2TestInput2Answer = 410
 
 func main() {
-	inputA := formatInput("inputA")
-	inputB := formatInput("inputB")
-	partOne(inputA, inputB)
+	// Part 1
+	fileName := "testInput2"
+	partOne(fileName)
+
+	// Part 2
+
 }
 
 // copied from https://github.com/brianstarke/aoc-2019/blob/master/day2-2/main.go#L31
@@ -30,7 +35,31 @@ func formatInput(n string) []string {
 }
 
 // Part 1 Functions
-func partOne(inputA []string, inputB []string) {
+func partOne(fileName string) {
+	inputA := formatInput(fmt.Sprintf("%sA", fileName))
+	inputB := formatInput(fmt.Sprintf("%sB", fileName))
+
+	d := getDistance(inputA, inputB)
+	fmt.Printf("Part 1 Answer: %v\n", d)
+
+	if fileName == "testInput1" {
+		if part1TestInput1Answer != d {
+			fmt.Printf("Part 1 is incorrect, got: %v, want: %v\n", d, part1TestInput1Answer)
+		}
+
+		fmt.Printf("Part 1 is correct\n")
+	}
+
+	if fileName == "testInput2" {
+		if part1TestInput2Answer != d {
+			fmt.Printf("Part 1 is incorrect, got: %v, want: %v\n", d, part1TestInput2Answer)
+		}
+
+		fmt.Printf("Part 1 is correct\n")
+	}
+}
+
+func getDistance(inputA []string, inputB []string) int {
 	// get wire paths
 	wirePathA := getPaths(inputA)
 	wirePathB := getPaths(inputB)
@@ -38,10 +67,8 @@ func partOne(inputA []string, inputB []string) {
 	// figure out where they first cross
 	i := findFirstIntersection(wirePathA, wirePathB)
 
-	// calculate manhattan distance
-	d := calculateManhattanDistance(i)
-
-	fmt.Printf("Part 1 Answer: %v\n", d)
+	// return calculated manhattan distance
+	return calculateManhattanDistance(i)
 }
 
 // this could be optimized
