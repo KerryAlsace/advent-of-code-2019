@@ -13,8 +13,8 @@ var testInput1Answer = 159
 var testInput2Answer = 135
 
 func main() {
-	inputA := formatInput("testInput1A")
-	inputB := formatInput("testInput1B")
+	inputA := formatInput("testInput2A")
+	inputB := formatInput("testInput2B")
 	partOne(inputA, inputB)
 }
 
