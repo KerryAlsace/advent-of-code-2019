@@ -8,11 +8,37 @@ import (
 
 func main() {
 	fileName := "input"
-	partOne(fileName)
+	intInput := 1
+	partOne(fileName, intInput)
 }
 
-func partOne(fileName string) {
+func formatInput(n string) []int {
+	fileName := fmt.Sprintf("%s.txt", n)
+	b, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		panic(err)
+	}
 
+	s := strings.Split(string(b), ", ")
+
+	m := make([]int, len(s))
+
+	for i, r := range s {
+		x, err := strconv.Atoi(r)
+		if err != nil {
+			panic(err)
+		}
+
+		m[i] = x
+	}
+
+	return m
+}
+
+func partOne(fileName string, intInput int) {
+	input := formatInput(fileName)
+
+	fmt.Printf("Part 1 Answer: %v\n", compute(input, intInput))
 }
 
 // Instruction is an instruction
@@ -48,9 +74,69 @@ const (
 	PositionModeOne               = 1
 )
 
-func getNextSet(lastIndex int, input []int) (bool, []int, int) {
+func compute(input []int, intInput int) int {
+	cont, opcode, params, lastIndex, intOutput := getNextSet(-1, input, intInput)
+
+	for cont {
+		makeCalcs(opcode, params, input, intOutput)
+		cont, opcode, params, lastIndex, intOutput = getNextSet(lastIndex, input, intOutput)
+	}
+
+	return intOutput
+}
+
+func getNextSet(lastIndex int, input []int, intInput int) (cont bool, opcode Opcode, params []int, newLastIndex int, output int) {
+	cont = true
 	firstIndex := lastIndex + 1
 
+	opcode, pms, length := getOpcodeAndPositionModes(input[firstIndex])
+	params, newLastIndex = getParams(opcode, firstIndex, input)
+
+	if opcode == OpcodeNinetyNine {
+		cont = false
+		output = intInput
+	}
+
+
+	return cont, opcode, params, newLastIndex, output
+}
+
+func getOpcodePositionModesAndLength(codes int) (opcode Opcode, pms int, length int) {
+	codesString := strconv.Itoa(codes)
+
+	opcodeString := codeString[len(codeString)-2:]
+	opcodeInt, err := strconv.Atoi(opcodeString)
+	if err != nil {
+		panic(err)
+	}
+
+	opcode = getOpcode(opcodeInt)
+	positionModesString := codeString[0 : len(codeString)-2]
+
+	pms, err = strconv.Atoi(positionModesString)
+	if err != nil {
+		panic(err)
+	}
+
+	length = len(positionModesString)
+
+	return opcode, pms, length
+}
+
+func getParams(opcode Opcode, firstIndex int, input []int) ([]int, int) {
+	switch opcode {
+	case OpcodeOne:
+	case OpcodeTwo:
+		return []int{input[firstIndex], input[firstIndex+1], input[firstIndex+2], input[firstIndex+3]}, firstIndex+3
+	case OpcodeThree:
+		return []int{}
+	case OpcodeFour:
+		return []int{}
+	case OpcodeNinetyNine:
+		return []int{}, firstIndex - 1
+	default:
+		panic(fmt.Sprintf("Unknown opcode: %v", opcode))
+	}
 }
 
 func getOpcode(opcode int) Opcode {
@@ -63,13 +149,18 @@ func getOpcode(opcode int) Opcode {
 		return OpcodeThree
 	case 04:
 		return OpcodeFour
+	case 99:
+		return OpcodeNinetyNine
 	default:
 		panic(fmt.Sprintf("Unknown opcode: %v", opcode))
 	}
 }
 
-func enactOpcode(opcode Opcode) {
-
+func enactOpcode(opcode Opcode, input []int, set) {
+	switch opcode {
+	case OpcodeOne:
+		opcodeOne()
+	}
 }
 
 func opcodeOne(trigger int, input []int) {
